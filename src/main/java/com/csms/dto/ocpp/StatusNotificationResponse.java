@@ -1,8 +1,7 @@
 package com.csms.dto.ocpp;
 
-import lombok.Data;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-@Data
+@JsonSerialize
 public class StatusNotificationResponse {
-    // Empty response as per OCPP 1.6 specification
 }
