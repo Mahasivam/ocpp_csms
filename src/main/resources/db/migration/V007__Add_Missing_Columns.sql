@@ -1,0 +1,10 @@
+-- Add missing columns to charging_stations table
+
+ALTER TABLE charging_stations 
+ADD COLUMN IF NOT EXISTS iccid VARCHAR(255),
+ADD COLUMN IF NOT EXISTS imsi VARCHAR(255),
+ADD COLUMN IF NOT EXISTS meter_type VARCHAR(255),
+ADD COLUMN IF NOT EXISTS meter_serial_number VARCHAR(255),
+ADD COLUMN IF NOT EXISTS endpoint_url VARCHAR(500),
+ADD COLUMN IF NOT EXISTS is_registered BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS registration_status VARCHAR(50) DEFAULT 'Pending';

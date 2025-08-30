@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: ocpp-csms
+
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://postgres:5432/ocpp_csms}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:root}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+    show-sql: false
+
+  jackson:
+    time-zone: UTC
+    date-format: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.csms: INFO
+    org.springframework.web.socket: INFO
+  file:
+    name: /app/logs/ocpp-csms.log
+  pattern:
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: always
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+ocpp:
+  websocket:
+    path: /ocpp/{chargePointId}
+  heartbeat:
+    timeout: 600
+  transaction:
+    timeout: 86400

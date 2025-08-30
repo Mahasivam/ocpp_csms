@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,8 @@ public class OcppMessageService {
     private final MeterValueService meterValueService;
     private final ReservationService reservationService;
     private final ConfigurationService configurationService;
+    @Lazy
+    private final FirmwareManagementService firmwareManagementService;
     private final ObjectMapper objectMapper;
 
     public String handleMessage(String chargePointId, String messageId, String action, JsonNode payload) {
@@ -190,15 +193,25 @@ public class OcppMessageService {
 
     private String handleMeterValues(String chargePointId, String messageId, JsonNode payload) throws Exception {
         MeterValuesRequest request = objectMapper.treeToValue(payload, MeterValuesRequest.class);
+        
+        log.info("Received MeterValues from {}: connectorId={}, transactionId={}, {} meter values", 
+                chargePointId, request.getConnectorId(), request.getTransactionId(), 
+                request.getMeterValue() != null ? request.getMeterValue().size() : 0);
 
         Optional<ChargingStation> stationOpt = chargingStationService.findByChargePointId(chargePointId);
         if (stationOpt.isPresent()) {
-            meterValueService.storeMeterValues(
+            // Use the new method for proper MeterValue DTOs
+            meterValueService.storeMeterValuesFromRequest(
                     stationOpt.get(),
                     request.getConnectorId(),
                     request.getTransactionId(),
                     request.getMeterValue()
             );
+            
+            log.debug("Successfully stored meter values for transaction {} on connector {} for charge point {}", 
+                     request.getTransactionId(), request.getConnectorId(), chargePointId);
+        } else {
+            log.warn("Charge point {} not found when processing MeterValues", chargePointId);
         }
 
         MeterValuesResponse response = new MeterValuesResponse();
@@ -206,21 +219,36 @@ public class OcppMessageService {
     }
 
     private String handleDataTransfer(String chargePointId, String messageId, JsonNode payload) throws Exception {
-        log.info("Received data transfer from {}: {}", chargePointId, payload);
+        DataTransferRequest request = objectMapper.treeToValue(payload, DataTransferRequest.class);
+        log.info("Received data transfer from {}: vendorId={}, messageId={}", 
+                chargePointId, request.getVendorId(), request.getMessageId());
 
         // For now, accept all data transfers
-        // In production, implement vendor-specific handling
-        return createCallResult(messageId, "{\"status\":\"Accepted\"}");
+        // In production, implement vendor-specific handling based on vendorId and messageId
+        DataTransferResponse response = new DataTransferResponse("Accepted", null);
+        return createCallResult(messageId, response);
     }
 
     private String handleDiagnosticsStatusNotification(String chargePointId, String messageId, JsonNode payload) throws Exception {
-        log.info("Received diagnostics status from {}: {}", chargePointId, payload);
-        return createCallResult(messageId, "{}");
+        DiagnosticsStatusNotificationRequest request = objectMapper.treeToValue(payload, DiagnosticsStatusNotificationRequest.class);
+        log.info("Received diagnostics status from {}: {}", chargePointId, request.getStatus());
+        
+        // Update diagnostics status
+        firmwareManagementService.updateDiagnosticsStatus(chargePointId, request.getStatus());
+        
+        DiagnosticsStatusNotificationResponse response = new DiagnosticsStatusNotificationResponse();
+        return createCallResult(messageId, response);
     }
 
     private String handleFirmwareStatusNotification(String chargePointId, String messageId, JsonNode payload) throws Exception {
-        log.info("Received firmware status from {}: {}", chargePointId, payload);
-        return createCallResult(messageId, "{}");
+        FirmwareStatusNotificationRequest request = objectMapper.treeToValue(payload, FirmwareStatusNotificationRequest.class);
+        log.info("Received firmware status from {}: {}", chargePointId, request.getStatus());
+        
+        // Update firmware status
+        firmwareManagementService.updateFirmwareStatus(chargePointId, request.getStatus());
+        
+        FirmwareStatusNotificationResponse response = new FirmwareStatusNotificationResponse();
+        return createCallResult(messageId, response);
     }
 
     public void handleResponse(String chargePointId, String messageId, JsonNode payload) {

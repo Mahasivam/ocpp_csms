@@ -31,8 +31,8 @@ public class MeterValue {
 
     private LocalDateTime timestamp;
 
-    @Column(name = "meter_value")
-    private Integer meterValue;
+    @Column(name = "value")
+    private String value;
 
     private String context;
 

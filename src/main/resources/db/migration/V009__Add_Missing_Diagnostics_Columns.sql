@@ -1,0 +1,8 @@
+-- Add missing columns to diagnostics table
+
+ALTER TABLE diagnostics 
+ADD COLUMN IF NOT EXISTS location VARCHAR(500) NOT NULL DEFAULT '',
+ADD COLUMN IF NOT EXISTS start_time TIMESTAMP,
+ADD COLUMN IF NOT EXISTS stop_time TIMESTAMP,
+ADD COLUMN IF NOT EXISTS retries INTEGER,
+ADD COLUMN IF NOT EXISTS retry_interval INTEGER;

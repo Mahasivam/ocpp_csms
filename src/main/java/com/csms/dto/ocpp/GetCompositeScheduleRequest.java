@@ -4,13 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MeterValuesRequest {
+public class GetCompositeScheduleRequest {
     private Integer connectorId;
-    private Integer transactionId;
-    private List<MeterValue> meterValue;
+    private Integer duration;
+    private String chargingRateUnit; // W, A
 }
