@@ -1,0 +1,12 @@
+package com.csms.dto.ocpp;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ResetResponse {
+    private String status; // "Accepted", "Rejected"
+}

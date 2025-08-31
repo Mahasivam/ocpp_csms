@@ -237,18 +237,4 @@ public class RemoteCommandService {
         }
     }
 
-    // Additional DTOs for remote commands
-    @lombok.Data
-    @lombok.AllArgsConstructor
-    @lombok.NoArgsConstructor
-    public static class ResetRequest {
-        private String type; // Hard, Soft
-    }
-
-    @lombok.Data
-    @lombok.AllArgsConstructor
-    @lombok.NoArgsConstructor
-    public static class UnlockConnectorRequest {
-        private Integer connectorId;
-    }
 }
