@@ -305,10 +305,37 @@ public class OcppMessageService {
             return createErrorResponse(messageId, "GenericError", "Charge point not registered");
         }
 
-        // For now, accept all remote start requests
-        // In production, add business logic validation here
-        RemoteStartTransactionResponse response = new RemoteStartTransactionResponse("Accepted");
-        return createCallResult(messageId, response);
+        ChargingStation station = stationOpt.get();
+        
+        // Validate IdTag authorization
+        StartTransactionResponse.IdTagInfo idTagInfo = authorizationService.authorize(request.getIdTag());
+        if (!"Accepted".equals(idTagInfo.getStatus())) {
+            log.warn("RemoteStartTransaction rejected: IdTag {} not authorized", request.getIdTag());
+            RemoteStartTransactionResponse response = new RemoteStartTransactionResponse("Rejected");
+            return createCallResult(messageId, response);
+        }
+
+        try {
+            // Actually start the transaction in the database
+            Integer transactionId = transactionService.startTransaction(
+                    station,
+                    request.getConnectorId(),
+                    request.getIdTag(),
+                    0, // Initial meter value
+                    LocalDateTime.now()
+            );
+            
+            log.info("Successfully started transaction {} via RemoteStartTransaction for {} on connector {}", 
+                     transactionId, request.getIdTag(), request.getConnectorId());
+                     
+            RemoteStartTransactionResponse response = new RemoteStartTransactionResponse("Accepted");
+            return createCallResult(messageId, response);
+            
+        } catch (Exception e) {
+            log.error("Error starting transaction via RemoteStartTransaction: {}", e.getMessage(), e);
+            RemoteStartTransactionResponse response = new RemoteStartTransactionResponse("Rejected");
+            return createCallResult(messageId, response);
+        }
     }
 
     private String handleRemoteStopTransaction(String chargePointId, String messageId, JsonNode payload) throws Exception {
@@ -392,6 +419,7 @@ public class OcppMessageService {
     }
 
     private String handleClearCache(String chargePointId, String messageId, JsonNode payload) throws Exception {
+        ClearCacheRequest request = objectMapper.treeToValue(payload, ClearCacheRequest.class);
         log.info("Frontend requested ClearCache for {}", chargePointId);
         
         ClearCacheResponse response = new ClearCacheResponse("Accepted");

@@ -12,7 +12,6 @@ import java.util.concurrent.CompletableFuture;
 @RestController
 @RequestMapping("/api/reservations")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class ReservationController {
 
     private final RemoteCommandService remoteCommandService;

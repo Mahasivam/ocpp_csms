@@ -12,7 +12,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/meter-values")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class MeterValueController {
 
     private final MeterValueService meterValueService;

@@ -2,8 +2,9 @@
 
 ## Backend Configuration
 - **Backend URL**: `http://localhost:8080`
-- **Frontend URL**: `http://localhost:3000`
-- **CORS**: Now configured for React integration
+- **Frontend URL**: `http://localhost:3000`  
+- **CORS**: ✅ Properly configured with `allowedOriginPatterns` for React integration
+- **Transaction API**: ✅ Fixed to return only active transactions (endTimestamp IS NULL)
 
 ## Available API Endpoints
 

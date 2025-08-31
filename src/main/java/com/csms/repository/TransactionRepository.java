@@ -20,4 +20,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     Optional<Transaction> findByChargingStationIdAndConnectorIdAndStatus(
             UUID chargingStationId, Integer connectorId, String status);
+
+    // Add methods to find active transactions (where endTimestamp is null)
+    List<Transaction> findByEndTimestampIsNull();
+    List<Transaction> findByChargingStationIdAndEndTimestampIsNull(UUID chargingStationId);
+    
+    @Query("SELECT t FROM Transaction t JOIN t.chargingStation cs WHERE cs.chargePointId = :chargePointId AND t.endTimestamp IS NULL")
+    List<Transaction> findActiveByChargePointId(String chargePointId);
 }

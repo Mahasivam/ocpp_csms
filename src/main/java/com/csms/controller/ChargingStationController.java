@@ -19,7 +19,6 @@ import java.util.concurrent.CompletableFuture;
 @RestController
 @RequestMapping("/api/charging-stations")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @Slf4j
 public class ChargingStationController {
 
@@ -52,7 +51,15 @@ public class ChargingStationController {
     }
 
     @GetMapping("/{chargePointId}/transactions")
-    public ResponseEntity<List<Transaction>> getTransactions(@PathVariable String chargePointId) {
+    public ResponseEntity<List<Transaction>> getActiveTransactions(@PathVariable String chargePointId) {
+        // Return only active transactions (where endTimestamp is null)
+        List<Transaction> activeTransactions = transactionService.findActiveByChargePointId(chargePointId);
+        return ResponseEntity.ok(activeTransactions);
+    }
+    
+    @GetMapping("/{chargePointId}/transactions/all")
+    public ResponseEntity<List<Transaction>> getAllTransactions(@PathVariable String chargePointId) {
+        // Return all transactions (including completed ones)
         return chargingStationService.findByChargePointId(chargePointId)
                 .map(station -> {
                     List<Transaction> transactions = transactionService.findByChargingStation(station.getId());

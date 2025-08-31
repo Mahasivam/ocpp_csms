@@ -94,11 +94,19 @@ public class TransactionService {
     }
 
     public List<Transaction> findActiveTransactions() {
-        return transactionRepository.findByStatus("Active");
+        return transactionRepository.findByEndTimestampIsNull();
     }
 
     public List<Transaction> findByChargingStation(UUID chargingStationId) {
         return transactionRepository.findByChargingStationId(chargingStationId);
+    }
+
+    public List<Transaction> findActiveByChargingStation(UUID chargingStationId) {
+        return transactionRepository.findByChargingStationIdAndEndTimestampIsNull(chargingStationId);
+    }
+
+    public List<Transaction> findActiveByChargePointId(String chargePointId) {
+        return transactionRepository.findActiveByChargePointId(chargePointId);
     }
 
     private Integer generateTransactionId() {

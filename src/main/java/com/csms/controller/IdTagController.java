@@ -13,7 +13,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/id-tags")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class IdTagController {
 
     private final IdTagRepository idTagRepository;

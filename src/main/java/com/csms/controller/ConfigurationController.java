@@ -13,7 +13,6 @@ import java.util.concurrent.CompletableFuture;
 @RestController
 @RequestMapping("/api/configuration")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class ConfigurationController {
 
     private final ConfigurationService configurationService;
